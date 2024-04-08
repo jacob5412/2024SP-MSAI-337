@@ -161,3 +161,5 @@ cython_debug/
 
 # Project folders
 Homework-1/transformers
+Homework-1/models/gpt2
+*.DS_Store
