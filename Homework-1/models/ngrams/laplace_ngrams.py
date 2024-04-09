@@ -42,6 +42,7 @@ def calculate_laplace_perplexities(train_data, test_data):
     perplexities = {}
     for n in [1, 2, 3, 7]:
         ngram_counts, n_minus_1_gram_counts = get_ngram_model(train_data, n)
-        perplexity = test_laplace_ngram_model(test_data, ngram_counts, n_minus_1_gram_counts, n)
-        perplexities[f"{n}-gram"] = perplexity
+        if len(test_data) >= n:
+            perplexity = test_laplace_ngram_model(test_data, ngram_counts, n_minus_1_gram_counts, n)
+            perplexities[f"{n}-gram"] = perplexity
     return perplexities
