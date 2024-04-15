@@ -19,6 +19,7 @@ def test_laplace_ngram_model(test_tokens, ngram_counts, n_minus_1_gram_counts, n
     """
     log_likelihood = 0.0
     N = 0  # total n-grams in the test data
+    num_oov = 0  # count of out-of-vocabulary n-grams
 
     if n == 1:
         total_unigrams = sum(ngram_counts.values())
@@ -32,6 +33,9 @@ def test_laplace_ngram_model(test_tokens, ngram_counts, n_minus_1_gram_counts, n
         test_n_minus_1_gram = test_ngram[:-1] if n > 1 else None
 
         numerator = ngram_counts.get(test_ngram, 0) + 1
+        if numerator == 1:
+            num_oov += 1
+        
         if n > 1:
             denominator = n_minus_1_gram_counts.get(test_n_minus_1_gram, 0) + vocab_size
         else:
@@ -42,6 +46,9 @@ def test_laplace_ngram_model(test_tokens, ngram_counts, n_minus_1_gram_counts, n
         N += 1
 
     perplexity = math.exp(-log_likelihood / N)
+    
+    print(f"Vocabulary Size: {vocab_size}")
+    print(f"Number of OOV instances: {num_oov}")
     return perplexity
 
 
