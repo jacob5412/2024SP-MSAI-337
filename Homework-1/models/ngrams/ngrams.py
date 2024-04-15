@@ -52,6 +52,7 @@ def test_ngram_model(test_tokens, ngram_counts, n_minus_1_gram_counts, n, epsilo
     """
     log_likelihood = 0.0
     N = 0  # Total number of n-grams considered in the test data
+    num_oov = 0  # count of out-of-vocabulary n-grams
 
     if n == 1:
         total_unigrams = sum(ngram_counts.values())
@@ -65,6 +66,9 @@ def test_ngram_model(test_tokens, ngram_counts, n_minus_1_gram_counts, n, epsilo
 
         # Calculate the probability of the n-gram
         numerator = ngram_counts.get(test_ngram, 0) + epsilon
+        if numerator == epsilon:
+            num_oov += 1
+
         if n > 1:
             # When n > 1, we use the (n-1)-gram model for context
             denominator = n_minus_1_gram_counts.get(test_n_minus_1_gram, 0) + (
@@ -83,6 +87,9 @@ def test_ngram_model(test_tokens, ngram_counts, n_minus_1_gram_counts, n, epsilo
 
     # Calculate and return perplexity
     perplexity = math.exp(-log_likelihood / N)
+
+    print(f"Vocabulary Size: {vocab_size}")
+    print(f"Number of OOV instances: {num_oov}")
     return perplexity
 
 
