@@ -1,8 +1,16 @@
+import sys
 import time
 
 
 def train_loop(
-    dataloader, tokenizer, model, linear, loss_fn, optimizer, device, print_every=10
+    dataloader,
+    tokenizer,
+    model,
+    linear,
+    loss_fn,
+    optimizer,
+    device,
+    print_every=10,
 ):
     model.train()
     total_loss = 0
@@ -50,7 +58,7 @@ def train_loop(
             current_accuracy = accumulated_correct / accumulated_samples
             current_time = time.time()
             print(
-                f"Batch {batch_index + 1}/{len(dataloader)}: Loss = {current_loss:.4f}, Accuracy = {current_accuracy:.4f}, Time = {current_time - last_print_time:.2f}s"
+                f"Batch {batch_index + 1}/{len(dataloader)}: Loss = {current_loss:.4f}, Accuracy = {current_accuracy:.4f}, Time = {current_time - last_print_time:.2f}s",
             )
 
             accumulated_loss = 0

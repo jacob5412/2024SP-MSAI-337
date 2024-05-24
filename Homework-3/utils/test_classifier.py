@@ -1,12 +1,9 @@
-import sys
 import time
 
 import torch
 
 
-def valid_loop(
-    dataloader, tokenizer, model, linear, loss_fn, device, log_filename, print_every=10
-):
+def test_loop(dataloader, tokenizer, model, linear, loss_fn, device, print_every=10):
     model.eval()
     total_loss = 0
     total_correct = 0
@@ -41,7 +38,7 @@ def valid_loop(
                 batch_loss = loss.item()
                 batch_accuracy = correct / labels_indices.size(0)
                 print(
-                    f"Validation Batch {batch_index + 1}: Loss = {batch_loss:.4f}, Accuracy = {batch_accuracy:.4f}, Time = {current_time - last_print_time:.2f}s"
+                    f"Test Batch {batch_index + 1}: Loss = {batch_loss:.4f}, Accuracy = {batch_accuracy:.4f}, Time = {current_time - last_print_time:.2f}s"
                 )
                 last_print_time = current_time
 
@@ -49,7 +46,7 @@ def valid_loop(
     avg_loss = total_loss / len(dataloader)
     accuracy = total_correct / total_samples
     print(
-        f"Validation finished: Loss = {avg_loss:.4f}, Accuracy = {accuracy:.4f}, Total time = {total_time:.2f}s"
+        f"Testing finished: Loss = {avg_loss:.4f}, Accuracy = {accuracy:.4f}, Total time = {total_time:.2f}s"
     )
 
     return avg_loss, accuracy
