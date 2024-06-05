@@ -1,35 +1,51 @@
-def generate_answer(model, tokenizer, input_text, device):
-    inputs = tokenizer.encode(input_text, return_tensors="pt").to(device)
+from tqdm import tqdm
+
+
+def generate_batch_answers(model, tokenizer, input_texts, device):
+    inputs = tokenizer(
+        input_texts, return_tensors="pt", padding=True, truncation=True, max_length=512
+    ).to(device)
     outputs = model.generate(
-        inputs, max_length=512, pad_token_id=tokenizer.eos_token_id
+        inputs["input_ids"], max_length=512, pad_token_id=tokenizer.eos_token_id
     )
-    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    decoded_outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+    return decoded_outputs
 
 
-def evaluate_model(test_data, model, tokenizer, device, print_answers=False):
+def evaluate_model(test_data, model, tokenizer, device, batch_size=13):
     val_predictions = []
     val_references = []
 
     correct = 0
-    for idx, item in enumerate(test_data):
-        input, label = item
+    for start_idx in tqdm(range(0, len(test_data), batch_size), desc="Evaluating"):
+        end_idx = min(start_idx + batch_size, len(test_data))
+        batch = test_data[start_idx:end_idx]
 
-        input_text = tokenizer.decode(input["input_ids"], skip_special_tokens=True)
-        input_text1 = input_text.split("[ANSWER]")[0] + "[ANSWER]"
+        input_texts = []
+        labels = []
+        for item in batch:
+            input_, label = item
+            input_texts.append(input_["input_ids"])
 
-        generated_answer = generate_answer(model, tokenizer, input_text1, device)
-        input_answer = input_text.split("[ANSWER]")[1].strip()
-        if print_answers and idx % 100 == 0:
-            print("input text for generation:", input_text1)
+        input_texts_decoded = tokenizer.batch_decode(
+            input_texts, skip_special_tokens=True
+        )
+        input_texts_processed = [
+            text.split("[ANSWER]")[0] + "[ANSWER]" for text in input_texts_decoded
+        ]
+        labels = [text.split("[ANSWER]")[1].strip() for text in input_texts_decoded]
 
-            print("generated answer:", generated_answer)
-            print("actual answer:", input_answer)
+        generated_answers = generate_batch_answers(
+            model, tokenizer, input_texts_processed, device
+        )
 
-        if input_answer[0] == generated_answer.split("[ANSWER]")[1].strip()[0]:
-            correct += 1
+        for idx, generated_answer in enumerate(generated_answers):
+            input_answer = labels[idx]
+            if input_answer[0] == generated_answer.split("[ANSWER]")[1].strip()[0]:
+                correct += 1
 
-        val_predictions.append(generated_answer)
-        val_references.append(input_answer)
+            val_predictions.append(generated_answer)
+            val_references.append(input_answer)
 
     accuracy = correct / len(test_data)
     return accuracy

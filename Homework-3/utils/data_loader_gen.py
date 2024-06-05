@@ -25,7 +25,7 @@ def read_data(file_name, tokenizer, print_obs_flag=False):
         stem = result["question"]["stem"]
         choices = [choice["text"] for choice in result["question"]["choices"]]
         answer = answers.index(result["answerKey"])
-        answer_label = answers[answer] + " " + choices[answer]
+        answer_label = answers[answer]
 
         obs = encode_instance(fact, stem, choices, answer_label, tokenizer)
         list_obs.append([obs, answer_label])
